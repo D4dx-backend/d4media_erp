@@ -3150,3 +3150,18 @@
 2025-07-21T09:30:16.440Z [info]: User indexes created {"service":"d4-media-app"}
 2025-07-21T09:30:16.900Z [error]: Error creating database indexes: An equivalent index already exists with the same name but different options. Requested index: { v: 2, key: { dueDate: 1 }, name: "dueDate_1", expireAfterSeconds: 15552000 }, existing index: { v: 2, key: { dueDate: 1 }, name: "dueDate_1", background: true } {"service":"d4-media-app","ok":0,"code":85,"codeName":"IndexOptionsConflict","$clusterTime":{"clusterTime":{"$timestamp":"7529465144657575949"},"signature":{"hash":"G2gIBfeIlW2OwSEmG2AxDMMaRBA=","keyId":{"low":3,"high":1744139103,"unsigned":false}}},"operationTime":{"$timestamp":"7529465144657575949"},"stack":"MongoServerError: An equivalent index already exists with the same name but different options. Requested index: { v: 2, key: { dueDate: 1 }, name: \"dueDate_1\", expireAfterSeconds: 15552000 }, existing index: { v: 2, key: { dueDate: 1 }, name: \"dueDate_1\", background: true }\n    at Connection.onMessage (/Users/d4-ceo/Desktop/D4 Tasks/server/node_modules/mongodb/lib/cmap/connection.js:202:26)\n    at MessageStream.<anonymous> (/Users/d4-ceo/Desktop/D4 Tasks/server/node_modules/mongodb/lib/cmap/connection.js:61:60)\n    at MessageStream.emit (node:events:517:28)\n    at processIncomingData (/Users/d4-ceo/Desktop/D4 Tasks/server/node_modules/mongodb/lib/cmap/message_stream.js:124:16)\n    at MessageStream._write (/Users/d4-ceo/Desktop/D4 Tasks/server/node_modules/mongodb/lib/cmap/message_stream.js:33:9)\n    at writeOrBuffer (node:internal/streams/writable:392:12)\n    at _write (node:internal/streams/writable:333:10)\n    at Writable.write (node:internal/streams/writable:337:10)\n    at TLSSocket.ondata (node:internal/streams/readable:777:22)\n    at TLSSocket.emit (node:events:517:28)"}
 2025-07-21T09:30:16.901Z [info]: Database indexes created successfully {"service":"d4-media-app"}
+2025-07-30T12:11:26.385Z [info]: Created uploads directory {"service":"d4-media-app"}
+2025-07-30T12:11:26.390Z [info]: Server running on port 5000 {"service":"d4-media-app"}
+2025-07-30T12:11:26.391Z [info]: Environment: undefined {"service":"d4-media-app"}
+2025-07-30T12:11:26.391Z [info]: Worker process 17224 started {"service":"d4-media-app"}
+2025-07-30T12:11:26.391Z [info]: Starting scheduler service... {"service":"d4-media-app"}
+2025-07-30T12:11:26.394Z [info]: Scheduler service started successfully {"service":"d4-media-app"}
+2025-07-30T12:11:26.395Z [info]: Scheduler service started {"service":"d4-media-app"}
+2025-07-30T12:28:35.514Z [info]: Received shutdown signal, closing server... {"service":"d4-media-app"}
+2025-07-30T12:28:37.899Z [info]: Server running on port 5000 {"service":"d4-media-app"}
+2025-07-30T12:28:37.901Z [info]: Environment: undefined {"service":"d4-media-app"}
+2025-07-30T12:28:37.901Z [info]: Worker process 21976 started {"service":"d4-media-app"}
+2025-07-30T12:28:37.901Z [info]: Starting scheduler service... {"service":"d4-media-app"}
+2025-07-30T12:28:37.905Z [info]: Scheduler service started successfully {"service":"d4-media-app"}
+2025-07-30T12:28:37.905Z [info]: Scheduler service started {"service":"d4-media-app"}
+2025-07-30T12:28:53.493Z [info]: Received shutdown signal, closing server... {"service":"d4-media-app"}

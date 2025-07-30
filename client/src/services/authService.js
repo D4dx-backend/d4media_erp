@@ -61,7 +61,29 @@ export const authService = {
     } catch (error) {
       console.error('Login error:', error);
       console.error('Login error response:', error.response?.data);
-      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Login failed')
+      
+      // Handle different types of errors
+      if (error.code === 'NETWORK_ERROR' || error.code === 'ERR_NETWORK') {
+        throw new Error('Network error. Please check your internet connection.')
+      }
+      
+      if (error.response?.status === 401) {
+        throw new Error('Invalid email or password. Please try again.')
+      }
+      
+      if (error.response?.status === 400) {
+        const errorMsg = error.response?.data?.error || error.response?.data?.message
+        if (errorMsg.includes('validation')) {
+          throw new Error('Please check your email and password format.')
+        }
+        throw new Error(errorMsg || 'Invalid request. Please check your input.')
+      }
+      
+      if (error.response?.status >= 500) {
+        throw new Error('Server error. Please try again later.')
+      }
+      
+      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Login failed. Please try again.')
     }
   },
 

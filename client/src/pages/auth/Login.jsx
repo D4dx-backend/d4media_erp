@@ -28,14 +28,36 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      await login(formData)
+      const response = await login(formData)
       toast.success('Login successful!')
-      navigate('/dashboard')
+      
+      // Navigate based on user role
+      const userRole = response?.user?.role
+      if (userRole === 'super_admin') {
+        navigate('/dashboard')
+      } else if (userRole === 'department_admin') {
+        navigate('/dashboard')
+      } else if (userRole === 'reception') {
+        navigate('/dashboard')
+      } else if (userRole === 'client') {
+        navigate('/client-portal')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (error) {
-      toast.error(error.message || 'Login failed')
+      console.error('Login error:', error)
+      const errorMessage = error.message || 'Login failed. Please check your credentials.'
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleTestLogin = () => {
+    setFormData({
+      email: 'admin@d4media.com',
+      password: 'admin123'
+    })
   }
 
   return (
@@ -90,7 +112,25 @@ const Login = () => {
         >
           {isLoading ? <LoadingSpinner size="small" /> : 'Sign in'}
         </button>
+
+        {/* Test Login Button for Development */}
+        <button
+          type="button"
+          onClick={handleTestLogin}
+          className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          Use Test Credentials
+        </button>
       </form>
+
+      {/* Test Credentials Info */}
+      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <p className="text-xs text-blue-800 text-center">
+          <strong>Test Credentials:</strong><br />
+          Email: admin@d4media.com<br />
+          Password: admin123
+        </p>
+      </div>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
