@@ -272,7 +272,7 @@ coverage/
 .stylelintcache
 
 # Package lock files (if using yarn)
-# package-lock.json
+package-lock.json
 
 # Yarn lock file (if using npm)
-# yarn.lock
+yarn.lock

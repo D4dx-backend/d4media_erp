@@ -51,6 +51,7 @@
     "jest-environment-jsdom": "^30.0.4",
     "postcss": "^8.4.29",
     "tailwindcss": "^3.3.3",
+    "terser": "^5.43.1",
     "vite": "^4.4.5"
   }
 }
