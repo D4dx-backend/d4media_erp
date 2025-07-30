@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { toast } from 'react-hot-toast'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import ApiDebug from '../../components/debug/ApiDebug'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -65,6 +66,11 @@ const Login = () => {
       <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
         Sign in to your account
       </h2>
+      
+      {/* Debug component - remove in production */}
+      <div className="mb-6">
+        <ApiDebug />
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

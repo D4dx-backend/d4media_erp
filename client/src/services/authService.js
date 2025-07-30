@@ -1,55 +1,79 @@
-import axios from 'axios'
+import axios from "axios";
+import { API_CONFIG } from "../config/api.js";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
+// Debug environment variables
+console.log("Environment variables:", {
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  MODE: import.meta.env.MODE,
+  DEV: import.meta.env.DEV,
+  PROD: import.meta.env.PROD,
+});
+
+// Use API config
+const API_URL = API_CONFIG.BASE_URL;
+
+console.log("Final API URL from config:", API_URL);
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
+  timeout: API_CONFIG.TIMEOUT,
   headers: {
-    'Content-Type': 'application/json'
+    "Content-Type": "application/json",
   },
-  withCredentials: true
-})
+  withCredentials: true,
+});
 
 // Log API configuration
-console.log('API Configuration:', {
+console.log("API Configuration:", {
   baseURL: API_URL,
-  environment: import.meta.env.MODE
-})
+  timeout: API_CONFIG.TIMEOUT,
+  environment: import.meta.env.MODE,
+});
 
 // Add token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    // Log the full URL being called
+    const fullUrl = config.baseURL + config.url;
+    console.log("🚀 Making request to:", fullUrl);
+    console.log("📋 Request config:", {
+      method: config.method,
+      baseURL: config.baseURL,
+      url: config.url,
+      fullUrl: fullUrl,
+    });
+
+    const token = localStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-      console.log('Adding auth token to request:', config.url)
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log("🔑 Adding auth token to request:", config.url);
     } else {
-      console.warn('No auth token found for request:', config.url)
+      console.warn("⚠️ No auth token found for request:", config.url);
     }
-    return config
+    return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error)
-    return Promise.reject(error)
+    console.error("❌ Request interceptor error:", error);
+    return Promise.reject(error);
   }
-)
+);
 
 // Handle response errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/auth/login'
+      localStorage.removeItem("token");
+      window.location.href = "/auth/login";
     }
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 // Helper functions for auth headers and tokens
 export const getAuthToken = () => {
-  return localStorage.getItem('token');
+  return localStorage.getItem("token");
 };
 
 export const getAuthHeader = () => {
@@ -61,86 +85,114 @@ export const authService = {
   // Login user
   login: async (credentials) => {
     try {
-      console.log('Attempting login with credentials:', { email: credentials.email });
-      const response = await api.post('/auth/login', credentials)
-      console.log('Login response:', response.data);
-      return response.data
+      console.log("🔐 Attempting login with credentials:", {
+        email: credentials.email,
+      });
+      console.log("🌐 Using API URL:", API_URL);
+      console.log("📡 Full login URL:", `${API_URL}/auth/login`);
+
+      const response = await api.post("/auth/login", credentials);
+      console.log("✅ Login response:", response.data);
+      return response.data;
     } catch (error) {
-      console.error('Login error:', error);
-      console.error('Login error response:', error.response?.data);
-      
+      console.error("Login error:", error);
+      console.error("Login error response:", error.response?.data);
+
       // Handle different types of errors
-      if (error.code === 'NETWORK_ERROR' || error.code === 'ERR_NETWORK') {
-        throw new Error('Network error. Please check your internet connection.')
+      if (error.code === "NETWORK_ERROR" || error.code === "ERR_NETWORK") {
+        throw new Error(
+          "Network error. Please check your internet connection."
+        );
       }
-      
-      if (error.message && error.message.includes('CORS')) {
-        throw new Error('CORS error. The server may not be configured to accept requests from this domain.')
+
+      if (error.message && error.message.includes("CORS")) {
+        throw new Error(
+          "CORS error. The server may not be configured to accept requests from this domain."
+        );
       }
-      
+
       if (error.response?.status === 401) {
-        throw new Error('Invalid email or password. Please try again.')
+        throw new Error("Invalid email or password. Please try again.");
       }
-      
+
       if (error.response?.status === 400) {
-        const errorMsg = error.response?.data?.error || error.response?.data?.message
-        if (errorMsg.includes('validation')) {
-          throw new Error('Please check your email and password format.')
+        const errorMsg =
+          error.response?.data?.error || error.response?.data?.message;
+        if (errorMsg.includes("validation")) {
+          throw new Error("Please check your email and password format.");
         }
-        throw new Error(errorMsg || 'Invalid request. Please check your input.')
+        throw new Error(
+          errorMsg || "Invalid request. Please check your input."
+        );
       }
-      
+
       if (error.response?.status >= 500) {
-        throw new Error('Server error. Please try again later.')
+        throw new Error("Server error. Please try again later.");
       }
-      
-      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Login failed. Please try again.')
+
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Login failed. Please try again."
+      );
     }
   },
 
   // Register user
   register: async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData)
-      return response.data
+      const response = await api.post("/auth/register", userData);
+      return response.data;
     } catch (error) {
-      console.error('Registration error:', error);
-      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Registration failed')
+      console.error("Registration error:", error);
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Registration failed"
+      );
     }
   },
 
   // Logout user
   logout: async () => {
     try {
-      await api.post('/auth/logout')
+      await api.post("/auth/logout");
     } catch (error) {
-      console.error('Logout error:', error)
+      console.error("Logout error:", error);
     }
   },
 
   // Get current user
   getCurrentUser: async () => {
     try {
-      console.log('Getting current user profile...');
-      const response = await api.get('/users/profile')
-      console.log('Current user response:', response.data);
-      return response.data.user
+      console.log("Getting current user profile...");
+      const response = await api.get("/users/profile");
+      console.log("Current user response:", response.data);
+      return response.data.user;
     } catch (error) {
-      console.error('Get current user error:', error);
-      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Failed to get user')
+      console.error("Get current user error:", error);
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Failed to get user"
+      );
     }
   },
 
   // Refresh token
   refreshToken: async () => {
     try {
-      const response = await api.post('/auth/refresh')
-      return response.data
+      const response = await api.post("/auth/refresh");
+      return response.data;
     } catch (error) {
-      console.error('Token refresh error:', error);
-      throw new Error(error.response?.data?.error || error.response?.data?.message || 'Token refresh failed')
+      console.error("Token refresh error:", error);
+      throw new Error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Token refresh failed"
+      );
     }
-  }
-}
+  },
+};
 
 export default api;
