@@ -105,10 +105,107 @@ export const updateTask = async (taskId, taskData) => {
   }
 };
 
+// Update task progress
+export const updateTaskProgress = async (taskId, progress, note = "") => {
+  try {
+    const response = await api.put(`${API_URL}/${taskId}/progress`, {
+      progress,
+      note,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating task progress:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to update progress",
+    };
+  }
+};
+
+// Add progress note
+export const addProgressNote = async (taskId, note) => {
+  try {
+    const response = await api.post(`${API_URL}/${taskId}/notes`, { note });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding progress note:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to add note",
+    };
+  }
+};
+
+// Start time tracking
+export const startTimeTracking = async (taskId) => {
+  try {
+    const response = await api.post(`${API_URL}/${taskId}/time/start`);
+    return response.data;
+  } catch (error) {
+    console.error("Error starting time tracking:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to start time tracking",
+    };
+  }
+};
+
+// Stop time tracking
+export const stopTimeTracking = async (taskId) => {
+  try {
+    const response = await api.post(`${API_URL}/${taskId}/time/stop`);
+    return response.data;
+  } catch (error) {
+    console.error("Error stopping time tracking:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to stop time tracking",
+    };
+  }
+};
+
+// Add manual time entry
+export const addManualTimeEntry = async (taskId, timeData) => {
+  try {
+    const response = await api.post(
+      `${API_URL}/${taskId}/time/manual`,
+      timeData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error adding manual time entry:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to add time entry",
+    };
+  }
+};
+
+// Get time entries for a task
+export const getTimeEntries = async (taskId) => {
+  try {
+    const response = await api.get(`${API_URL}/${taskId}/time`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching time entries:", error);
+    return {
+      success: false,
+      data: [],
+      error: error.response?.data?.message || "Failed to fetch time entries",
+    };
+  }
+};
+
 export default {
   getTasks,
   getTaskById,
   getBillableTasks,
   createTask,
   updateTask,
+  updateTaskProgress,
+  addProgressNote,
+  startTimeTracking,
+  stopTimeTracking,
+  addManualTimeEntry,
+  getTimeEntries,
 };
