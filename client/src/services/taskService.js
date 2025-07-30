@@ -196,6 +196,20 @@ export const getTimeEntries = async (taskId) => {
   }
 };
 
+// Delete a task
+export const deleteTask = async (taskId) => {
+  try {
+    const response = await api.delete(`${API_URL}/${taskId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    return {
+      success: false,
+      error: error.response?.data?.message || "Failed to delete task",
+    };
+  }
+};
+
 export default {
   getTasks,
   getTaskById,
@@ -208,4 +222,5 @@ export default {
   stopTimeTracking,
   addManualTimeEntry,
   getTimeEntries,
+  deleteTask,
 };
