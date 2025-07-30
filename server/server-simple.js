@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 // Basic middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://d4media-erp.netlify.app'] 
+    ? ['https://yourdomain.com'] 
     : ['http://localhost:3000'],
   credentials: true
 }));
