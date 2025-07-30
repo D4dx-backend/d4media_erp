@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Git Commit with Gitmoji",
+  "description": "Automatically creates a git commit message with appropriate gitmoji when new changes are staged in the repository",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      ".git/index"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the staged git changes and create a commit message with an appropriate gitmoji. Use `git diff --cached` to see what changes are staged. Format the commit message as: [gitmoji] [type]: [description]. Choose the most appropriate gitmoji from the standard gitmoji guide (🎨 for code structure, ✨ for new features, 🐛 for bug fixes, 📝 for documentation, etc.). Keep the description concise and descriptive of what was changed."
+  }
+}
