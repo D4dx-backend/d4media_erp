@@ -1,5 +1,18 @@
+[build]
+  command = "npm run install:all && npm run build"
+  publish = "client/dist"
+  base = "."
+
 [[redirects]]
-  from = "/api/*"
-  to = "https://d4media-erp-hxqid.ondigitalocean.app/:splat"
+  from = "/*"
+  to = "/index.html"
   status = 200
-  force = true
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Opt out of Google's FLoC tracking
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Permissions-Policy = "interest-cohort=()" 
