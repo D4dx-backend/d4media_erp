@@ -22,7 +22,9 @@ class NotificationService {
   initializeSocketIO(server) {
     this.io = socketIO(server, {
       cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        origin: process.env.CLIENT_URL || process.env.NODE_ENV === 'production' 
+          ? ['https://d4media-erp.netlify.app', 'https://d4media-erp-netlify.app']
+          : 'http://localhost:3000',
         methods: ['GET', 'POST'],
         credentials: true
       }

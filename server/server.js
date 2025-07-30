@@ -99,18 +99,32 @@ if (isMaster) {
   });
   app.use("/api/", limiter);
 
+  // Handle preflight requests explicitly
+  app.options("*", (req, res) => {
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    );
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type,Authorization,X-Requested-With,Accept,Origin"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.sendStatus(204);
+  });
+
   // CORS configuration
-  app.use(
-    cors({
-      origin:
-        process.env.NODE_ENV === "production"
-          ? ["https://d4media-erp.netlify.app", "https://yourdomain.com"]
-          : ["http://localhost:3000", "http://localhost:5173"],
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    })
-  );
+  app.use(cors({
+    origin: [
+      'https://d4media-erp.netlify.app',
+      'http://localhost:3000', // for development
+      'http://localhost:5173'  // for Vite dev server
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 
   // Security middleware
   app.use(mongoSanitize()); // Prevent NoSQL injection attacks
@@ -166,6 +180,16 @@ if (isMaster) {
   app.use("/api/v1/events", cacheControlHeaders(60), eventRoutes); // Cache events for 1 minute
   app.use("/api/v1/quotations", cacheControlHeaders(0), quotationRoutes); // No caching for quotations
   app.use("/api/v1/activities", cacheControlHeaders(0), activityRoutes); // No caching for activity logs
+
+  // CORS test endpoint
+  app.get("/api/v1/test-cors", (req, res) => {
+    res.json({
+      success: true,
+      message: "CORS is working correctly",
+      origin: req.headers.origin,
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   // Health check endpoints
   app.get("/api/v1/health", async (req, res) => {
