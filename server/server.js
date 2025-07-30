@@ -77,7 +77,7 @@ if (isMaster) {
     cors: {
       origin:
         process.env.NODE_ENV === "production"
-          ? ["https://d4media-erp.netlify.app/auth/login"]
+          ? ["https://d4media-erp.netlify.app"]
           : ["http://localhost:3000"],
       methods: ["GET", "POST"],
       credentials: true,
