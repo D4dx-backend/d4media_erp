@@ -1,0 +1,29 @@
+{
+  "name": "d4-media-task-management",
+  "version": "1.0.0",
+  "description": "Task management system for D4 Media digital agency",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "test": "cd client && npm test && cd ../server && npm test",
+    "db:seed": "cd server && npm run db:seed",
+    "db:reset": "cd server && npm run db:reset"
+  },
+  "keywords": [
+    "task-management",
+    "react",
+    "nodejs",
+    "mongodb",
+    "digital-agency"
+  ],
+  "author": "D4 Media",
+  "license": "PRIVATE",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

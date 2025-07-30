@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Auto NPM Executor",
+  "description": "Automatically executes all npm requests and continues execution until the task finishes",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "package.json",
+      "client/package.json",
+      "server/package.json",
+      "package-lock.json",
+      "client/package-lock.json",
+      "server/package-lock.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A package.json file has been modified. Please analyze the changes and automatically execute any necessary npm commands (install, update, audit fix, etc.) to ensure all dependencies are properly installed and the project is ready to run. Continue executing npm commands until all tasks are completed successfully. If there are any errors, resolve them automatically and continue the process."
+  }
+}
