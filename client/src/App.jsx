@@ -22,7 +22,10 @@ const StudioBooking = React.lazy(() => import('./pages/studio/StudioBooking'))
 const EventBooking = React.lazy(() => import('./pages/studio/EventBooking'))
 const EventBookingManagement = React.lazy(() => import('./pages/studio/EventBookingManagement'))
 const RentalManagement = React.lazy(() => import('./pages/rentals/RentalManagement'))
-const EquipmentManagement = React.lazy(() => import('./pages/admin/EquipmentManagement'))
+const EquipmentManagement = React.lazy(() => import('./pages/equipment/EquipmentManagement'))
+const EquipmentList = React.lazy(() => import('./pages/equipment/EquipmentList'))
+const InOutTracker = React.lazy(() => import('./pages/equipment/InOutTracker'))
+const MaintenanceReport = React.lazy(() => import('./pages/equipment/MaintenanceReport'))
 const ErrorBoundary = React.lazy(() => import('./components/common/ErrorBoundary'))
 const Reports = React.lazy(() => import('./pages/reports/Reports'))
 const Settings = React.lazy(() => import('./pages/settings/Settings'))
@@ -82,6 +85,21 @@ function App() {
             <Route path="equipment" element={
               <ErrorBoundary>
                 <EquipmentManagement />
+              </ErrorBoundary>
+            } />
+            <Route path="equipment/list" element={
+              <ErrorBoundary>
+                <EquipmentList />
+              </ErrorBoundary>
+            } />
+            <Route path="equipment/tracker" element={
+              <ErrorBoundary>
+                <InOutTracker />
+              </ErrorBoundary>
+            } />
+            <Route path="equipment/maintenance" element={
+              <ErrorBoundary>
+                <MaintenanceReport />
               </ErrorBoundary>
             } />
             <Route path="invoices" element={<InvoiceManagement />} />

@@ -141,6 +141,122 @@ const equipmentSchema = new mongoose.Schema({
   notes: {
     type: String,
     trim: true
+  },
+  // Maintenance tracking
+  maintenanceHistory: [{
+    type: {
+      type: String,
+      enum: ['routine', 'repair', 'inspection', 'calibration', 'cleaning'],
+      required: true
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    performedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    performedDate: {
+      type: Date,
+      required: true,
+      default: Date.now
+    },
+    cost: {
+      type: Number,
+      min: 0,
+      default: 0
+    },
+    nextMaintenanceDate: {
+      type: Date
+    },
+    status: {
+      type: String,
+      enum: ['completed', 'pending', 'in_progress'],
+      default: 'completed'
+    },
+    notes: {
+      type: String,
+      trim: true
+    },
+    attachments: [{
+      filename: String,
+      url: String,
+      uploadedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }]
+  }],
+  // In/Out tracking
+  inOutHistory: [{
+    type: {
+      type: String,
+      enum: ['in', 'out'],
+      required: true
+    },
+    recordedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    recordedAt: {
+      type: Date,
+      required: true,
+      default: Date.now
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+      default: 1
+    },
+    purpose: {
+      type: String,
+      trim: true
+    },
+    location: {
+      type: String,
+      trim: true
+    },
+    project: {
+      type: String,
+      trim: true
+    },
+    expectedReturnDate: {
+      type: Date
+    },
+    actualReturnDate: {
+      type: Date
+    },
+    condition: {
+      type: String,
+      enum: ['excellent', 'good', 'fair', 'poor', 'damaged'],
+      default: 'good'
+    },
+    notes: {
+      type: String,
+      trim: true
+    }
+  }],
+  // Current status tracking
+  currentQuantityOut: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  lastMaintenanceDate: {
+    type: Date
+  },
+  nextMaintenanceDate: {
+    type: Date
+  },
+  maintenanceStatus: {
+    type: String,
+    enum: ['up_to_date', 'due_soon', 'overdue', 'in_maintenance'],
+    default: 'up_to_date'
   }
 }, {
   timestamps: true,
@@ -184,7 +300,68 @@ equipmentSchema.methods.checkAvailability = function(date, quantity = 1) {
 
 // Method to check if equipment is available for checkout
 equipmentSchema.methods.isAvailableForCheckout = function() {
-  return this.checkoutStatus === 'available' && this.isActive && this.availableQuantity > 0;
+  return this.checkoutStatus === 'available' && this.isActive && (this.availableQuantity - this.currentQuantityOut) > 0;
 };
+
+// Method to record equipment in/out
+equipmentSchema.methods.recordInOut = function(inOutData) {
+  this.inOutHistory.push(inOutData);
+  
+  if (inOutData.type === 'out') {
+    this.currentQuantityOut += inOutData.quantity;
+  } else if (inOutData.type === 'in') {
+    this.currentQuantityOut = Math.max(0, this.currentQuantityOut - inOutData.quantity);
+  }
+  
+  return this.save();
+};
+
+// Method to add maintenance record
+equipmentSchema.methods.addMaintenanceRecord = function(maintenanceData) {
+  this.maintenanceHistory.push(maintenanceData);
+  this.lastMaintenanceDate = maintenanceData.performedDate;
+  
+  if (maintenanceData.nextMaintenanceDate) {
+    this.nextMaintenanceDate = maintenanceData.nextMaintenanceDate;
+  }
+  
+  // Update maintenance status
+  this.updateMaintenanceStatus();
+  
+  return this.save();
+};
+
+// Method to update maintenance status
+equipmentSchema.methods.updateMaintenanceStatus = function() {
+  if (!this.nextMaintenanceDate) {
+    this.maintenanceStatus = 'up_to_date';
+    return;
+  }
+  
+  const today = new Date();
+  const nextMaintenance = new Date(this.nextMaintenanceDate);
+  const daysDiff = Math.ceil((nextMaintenance - today) / (1000 * 60 * 60 * 24));
+  
+  if (daysDiff < 0) {
+    this.maintenanceStatus = 'overdue';
+  } else if (daysDiff <= 7) {
+    this.maintenanceStatus = 'due_soon';
+  } else {
+    this.maintenanceStatus = 'up_to_date';
+  }
+};
+
+// Static method to get equipment needing maintenance
+equipmentSchema.statics.getNeedingMaintenance = function() {
+  return this.find({
+    isActive: true,
+    maintenanceStatus: { $in: ['due_soon', 'overdue'] }
+  }).sort({ nextMaintenanceDate: 1 });
+};
+
+// Virtual for available quantity (considering current out quantity)
+equipmentSchema.virtual('actualAvailableQuantity').get(function() {
+  return Math.max(0, this.availableQuantity - this.currentQuantityOut);
+});
 
 module.exports = mongoose.model('Equipment', equipmentSchema);

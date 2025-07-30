@@ -94,6 +94,60 @@ export const equipmentService = {
   sendEquipmentWhatsApp: async (data) => {
     const response = await api.post('/equipment/report/whatsapp', data);
     return response.data;
+  },
+
+  // Record equipment in/out
+  recordInOut: async (equipmentId, inOutData) => {
+    const response = await api.post(`/equipment/${equipmentId}/inout`, inOutData);
+    return response.data;
+  },
+
+  // Get equipment in/out history
+  getInOutHistory: async (equipmentId, params = {}) => {
+    const response = await api.get(`/equipment/${equipmentId}/inout-history`, { params });
+    return response.data;
+  },
+
+  // Add maintenance record
+  addMaintenanceRecord: async (equipmentId, maintenanceData) => {
+    const response = await api.post(`/equipment/${equipmentId}/maintenance`, maintenanceData);
+    return response.data;
+  },
+
+  // Get equipment maintenance history
+  getMaintenanceHistory: async (equipmentId, params = {}) => {
+    const response = await api.get(`/equipment/${equipmentId}/maintenance-history`, { params });
+    return response.data;
+  },
+
+  // Get maintenance report
+  getMaintenanceReport: async (params = {}) => {
+    const response = await api.get('/equipment/maintenance-report', { params });
+    return response.data;
+  },
+
+  // Event-based checkout methods
+  createEventCheckout: async (checkoutData) => {
+    const response = await api.post('/equipment/event-checkout', checkoutData);
+    return response.data;
+  },
+
+  // Get all event checkouts
+  getEventCheckouts: async (params = {}) => {
+    const response = await api.get('/equipment/event-checkout', { params });
+    return response.data;
+  },
+
+  // Return event checkout
+  returnEventCheckout: async (checkoutId, returnData) => {
+    const response = await api.put(`/equipment/event-checkout/${checkoutId}/return`, returnData);
+    return response.data;
+  },
+
+  // Get event checkout details
+  getEventCheckout: async (checkoutId) => {
+    const response = await api.get(`/equipment/event-checkout/${checkoutId}`);
+    return response.data;
   }
 };
 

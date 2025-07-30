@@ -32,6 +32,57 @@ api.interceptors.response.use(
 export const getEvents = async (params = {}) => {
   try {
     console.log('Fetching events with params:', params);
+    
+    // If date parameter is provided, filter by specific date
+    if (params.date) {
+      const targetDate = new Date(params.date);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // Mock data for today and tomorrow
+      const mockEvents = [];
+      
+      if (params.date === today.toISOString().split('T')[0]) {
+        // Today's events
+        mockEvents.push(
+          {
+            id: 'today-event-1',
+            title: 'Corporate Meeting',
+            eventType: 'Conference',
+            startTime: '09:00',
+            endTime: '12:00',
+            status: 'confirmed',
+            clientName: 'ABC Corp'
+          },
+          {
+            id: 'today-event-2',
+            title: 'Product Launch',
+            eventType: 'Launch Event',
+            startTime: '14:00',
+            endTime: '17:00',
+            status: 'confirmed',
+            clientName: 'XYZ Media'
+          }
+        );
+      } else if (params.date === tomorrow.toISOString().split('T')[0]) {
+        // Tomorrow's events
+        mockEvents.push(
+          {
+            id: 'tomorrow-event-1',
+            title: 'Training Workshop',
+            eventType: 'Workshop',
+            startTime: '10:00',
+            endTime: '15:00',
+            status: 'confirmed',
+            clientName: 'Education Plus'
+          }
+        );
+      }
+      
+      return { success: true, data: mockEvents, count: mockEvents.length };
+    }
+    
     const response = await api.get('/events', { params });
     console.log('Raw API response:', response);
     

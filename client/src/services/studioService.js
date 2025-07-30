@@ -15,6 +15,64 @@ export const getBookings = async (params = {}) => {
       return { data: [] };
     }
 
+    // If date parameter is provided, return mock data for today/tomorrow
+    if (params.date) {
+      const targetDate = new Date(params.date);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const mockBookings = [];
+      
+      if (params.date === today.toISOString().split('T')[0]) {
+        // Today's bookings
+        mockBookings.push(
+          {
+            id: 'today-booking-1',
+            clientName: 'Creative Agency Ltd',
+            title: 'Product Photography',
+            startTime: '09:00',
+            endTime: '12:00',
+            status: 'confirmed',
+            studioRoom: 'Studio A'
+          },
+          {
+            id: 'today-booking-2',
+            clientName: 'Fashion Brand Co',
+            title: 'Fashion Shoot',
+            startTime: '14:00',
+            endTime: '18:00',
+            status: 'confirmed',
+            studioRoom: 'Studio B'
+          }
+        );
+      } else if (params.date === tomorrow.toISOString().split('T')[0]) {
+        // Tomorrow's bookings
+        mockBookings.push(
+          {
+            id: 'tomorrow-booking-1',
+            clientName: 'Tech Startup Inc',
+            title: 'Corporate Headshots',
+            startTime: '10:00',
+            endTime: '13:00',
+            status: 'confirmed',
+            studioRoom: 'Studio A'
+          },
+          {
+            id: 'tomorrow-booking-2',
+            clientName: 'Local Restaurant',
+            title: 'Food Photography',
+            startTime: '15:00',
+            endTime: '17:00',
+            status: 'pending',
+            studioRoom: 'Studio C'
+          }
+        );
+      }
+      
+      return { data: mockBookings, success: true, count: mockBookings.length };
+    }
+
     const response = await api.get(`${API_URL}/bookings`, { params });
     console.log('Studio bookings API response:', response);
     return response.data;

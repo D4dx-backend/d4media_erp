@@ -22,7 +22,65 @@ const generateMockDashboardData = () => {
     tasksDueToday: 6,
     avgProgress: 68.5,
     totalTasks: 50,
-    activeTasks: 23
+    activeTasks: 23,
+    // Enhanced data for new dashboard components
+    todayStats: {
+      bookings: 3,
+      events: 2,
+      tasks: 8,
+      revenue: 2500
+    },
+    weekStats: {
+      bookings: 15,
+      events: 8,
+      completedTasks: 42,
+      revenue: 18500
+    },
+    monthStats: {
+      bookings: 65,
+      events: 28,
+      completedTasks: 145,
+      revenue: 75000
+    },
+    trends: {
+      bookingsChange: 12.5,
+      revenueChange: 8.3,
+      tasksChange: -2.1
+    },
+    urgentTasks: [
+      {
+        id: 1,
+        title: 'Client presentation due',
+        dueDate: new Date().toISOString(),
+        priority: 'urgent'
+      },
+      {
+        id: 2,
+        title: 'Video editing final cut',
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        priority: 'urgent'
+      }
+    ],
+    recentActivities: [
+      {
+        id: 1,
+        description: 'New studio booking confirmed for tomorrow',
+        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        type: 'booking'
+      },
+      {
+        id: 2,
+        description: 'Task "Logo design" marked as completed',
+        timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        type: 'task'
+      },
+      {
+        id: 3,
+        description: 'New event booking inquiry received',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        type: 'event'
+      }
+    ]
   };
 };
 

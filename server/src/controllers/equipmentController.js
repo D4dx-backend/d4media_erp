@@ -783,6 +783,353 @@ exports.generateEquipmentListPDF = async (req, res) => {
 };
 
 /**
+ * @desc    Record equipment in/out
+ * @route   POST /api/v1/equipment/:id/inout
+ * @access  Private (Department Head/Reception/Admin)
+ */
+exports.recordInOut = async (req, res) => {
+  try {
+    // Check permissions - Department heads, reception, and admins can record in/out
+    if (!['super_admin', 'department_admin', 'reception'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - Department Head, Reception, or Admin only'
+      });
+    }
+
+    const { id } = req.params;
+    const { type, quantity, purpose, location, project, expectedReturnDate, condition, notes } = req.body;
+
+    if (!['in', 'out'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Type must be either "in" or "out"'
+      });
+    }
+
+    const equipment = await Equipment.findById(id);
+    if (!equipment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Equipment not found'
+      });
+    }
+
+    // Validate quantity for 'out' operations
+    if (type === 'out' && quantity > equipment.actualAvailableQuantity) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${equipment.actualAvailableQuantity} units available for checkout`
+      });
+    }
+
+    const inOutData = {
+      type,
+      recordedBy: req.user._id,
+      quantity: parseInt(quantity),
+      purpose,
+      location,
+      project,
+      expectedReturnDate: expectedReturnDate ? new Date(expectedReturnDate) : null,
+      condition: condition || 'good',
+      notes
+    };
+
+    await equipment.recordInOut(inOutData);
+    await equipment.populate('inOutHistory.recordedBy', 'name email');
+
+    res.json({
+      success: true,
+      data: equipment,
+      message: `Equipment ${type === 'out' ? 'checked out' : 'returned'} successfully`
+    });
+
+  } catch (error) {
+    console.error('Error recording equipment in/out:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record equipment in/out',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Get equipment in/out history
+ * @route   GET /api/v1/equipment/:id/inout-history
+ * @access  Private
+ */
+exports.getInOutHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 50 } = req.query;
+
+    const equipment = await Equipment.findById(id)
+      .populate('inOutHistory.recordedBy', 'name email')
+      .select('name inOutHistory');
+
+    if (!equipment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Equipment not found'
+      });
+    }
+
+    // Sort history by date (newest first)
+    const sortedHistory = equipment.inOutHistory.sort((a, b) => new Date(b.recordedAt) - new Date(a.recordedAt));
+
+    // Pagination
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+    const paginatedHistory = sortedHistory.slice(skip, skip + limitNum);
+
+    res.json({
+      success: true,
+      data: {
+        equipment: { name: equipment.name, _id: equipment._id },
+        history: paginatedHistory,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: sortedHistory.length,
+          totalPages: Math.ceil(sortedHistory.length / limitNum)
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching in/out history:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch in/out history',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Add maintenance record
+ * @route   POST /api/v1/equipment/:id/maintenance
+ * @access  Private (Department Head/Admin only)
+ */
+exports.addMaintenanceRecord = async (req, res) => {
+  try {
+    // Check permissions - Department heads and admins can add maintenance records
+    if (!['super_admin', 'department_admin'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - Department Head or Admin only'
+      });
+    }
+
+    const { id } = req.params;
+    const { type, description, cost, nextMaintenanceDate, status, notes } = req.body;
+
+    const equipment = await Equipment.findById(id);
+    if (!equipment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Equipment not found'
+      });
+    }
+
+    const maintenanceData = {
+      type,
+      description,
+      performedBy: req.user._id,
+      cost: parseFloat(cost) || 0,
+      nextMaintenanceDate: nextMaintenanceDate ? new Date(nextMaintenanceDate) : null,
+      status: status || 'completed',
+      notes
+    };
+
+    await equipment.addMaintenanceRecord(maintenanceData);
+    await equipment.populate('maintenanceHistory.performedBy', 'name email');
+
+    res.json({
+      success: true,
+      data: equipment,
+      message: 'Maintenance record added successfully'
+    });
+
+  } catch (error) {
+    console.error('Error adding maintenance record:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add maintenance record',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Get equipment maintenance history
+ * @route   GET /api/v1/equipment/:id/maintenance-history
+ * @access  Private
+ */
+exports.getMaintenanceHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 50 } = req.query;
+
+    const equipment = await Equipment.findById(id)
+      .populate('maintenanceHistory.performedBy', 'name email')
+      .select('name maintenanceHistory lastMaintenanceDate nextMaintenanceDate maintenanceStatus');
+
+    if (!equipment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Equipment not found'
+      });
+    }
+
+    // Sort history by date (newest first)
+    const sortedHistory = equipment.maintenanceHistory.sort((a, b) => new Date(b.performedDate) - new Date(a.performedDate));
+
+    // Pagination
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+    const paginatedHistory = sortedHistory.slice(skip, skip + limitNum);
+
+    res.json({
+      success: true,
+      data: {
+        equipment: { 
+          name: equipment.name, 
+          _id: equipment._id,
+          lastMaintenanceDate: equipment.lastMaintenanceDate,
+          nextMaintenanceDate: equipment.nextMaintenanceDate,
+          maintenanceStatus: equipment.maintenanceStatus
+        },
+        history: paginatedHistory,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: sortedHistory.length,
+          totalPages: Math.ceil(sortedHistory.length / limitNum)
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching maintenance history:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch maintenance history',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Get maintenance report
+ * @route   GET /api/v1/equipment/maintenance-report
+ * @access  Private
+ */
+exports.getMaintenanceReport = async (req, res) => {
+  try {
+    const { startDate, endDate, status, type } = req.query;
+
+    // Build query for equipment needing maintenance
+    const equipmentQuery = { isActive: true };
+    
+    const [
+      equipmentNeedingMaintenance,
+      recentMaintenance,
+      maintenanceStats
+    ] = await Promise.all([
+      // Equipment needing maintenance
+      Equipment.find({
+        ...equipmentQuery,
+        maintenanceStatus: { $in: ['due_soon', 'overdue'] }
+      })
+      .populate('department', 'name')
+      .sort({ nextMaintenanceDate: 1 }),
+
+      // Recent maintenance activities
+      Equipment.aggregate([
+        { $match: equipmentQuery },
+        { $unwind: '$maintenanceHistory' },
+        {
+          $match: {
+            ...(startDate && { 'maintenanceHistory.performedDate': { $gte: new Date(startDate) } }),
+            ...(endDate && { 'maintenanceHistory.performedDate': { $lte: new Date(endDate) } }),
+            ...(status && { 'maintenanceHistory.status': status }),
+            ...(type && { 'maintenanceHistory.type': type })
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'maintenanceHistory.performedBy',
+            foreignField: '_id',
+            as: 'performedBy'
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            category: 1,
+            maintenance: '$maintenanceHistory',
+            performedBy: { $arrayElemAt: ['$performedBy', 0] }
+          }
+        },
+        { $sort: { 'maintenance.performedDate': -1 } },
+        { $limit: 100 }
+      ]),
+
+      // Maintenance statistics
+      Equipment.aggregate([
+        { $match: equipmentQuery },
+        {
+          $group: {
+            _id: null,
+            totalEquipment: { $sum: 1 },
+            upToDate: {
+              $sum: { $cond: [{ $eq: ['$maintenanceStatus', 'up_to_date'] }, 1, 0] }
+            },
+            dueSoon: {
+              $sum: { $cond: [{ $eq: ['$maintenanceStatus', 'due_soon'] }, 1, 0] }
+            },
+            overdue: {
+              $sum: { $cond: [{ $eq: ['$maintenanceStatus', 'overdue'] }, 1, 0] }
+            },
+            inMaintenance: {
+              $sum: { $cond: [{ $eq: ['$maintenanceStatus', 'in_maintenance'] }, 1, 0] }
+            }
+          }
+        }
+      ])
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        needingMaintenance: equipmentNeedingMaintenance,
+        recentMaintenance,
+        statistics: maintenanceStats[0] || {
+          totalEquipment: 0,
+          upToDate: 0,
+          dueSoon: 0,
+          overdue: 0,
+          inMaintenance: 0
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error generating maintenance report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate maintenance report',
+      error: error.message
+    });
+  }
+};
+
+/**
  * @desc    Send equipment list via WhatsApp
  * @route   POST /api/v1/equipment/report/whatsapp
  * @access  Private (Admin only)
@@ -851,6 +1198,326 @@ exports.sendEquipmentListWhatsApp = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to send equipment list via WhatsApp',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Create event-based equipment checkout
+ * @route   POST /api/v1/equipment/event-checkout
+ * @access  Private (Reception/Admin only)
+ */
+exports.createEventCheckout = async (req, res) => {
+  try {
+    // Check permissions
+    if (!['super_admin', 'department_admin', 'reception'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - Reception or Admin only'
+      });
+    }
+
+    const {
+      eventName,
+      eventType,
+      responsiblePerson,
+      contactNumber,
+      eventDate,
+      eventLocation,
+      expectedReturnDate,
+      items,
+      notes
+    } = req.body;
+
+    // Validate required fields
+    if (!eventName || !eventType || !responsiblePerson || !eventDate || !expectedReturnDate || !items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Validate equipment availability
+    for (const item of items) {
+      const equipment = await Equipment.findById(item.equipmentId);
+      if (!equipment) {
+        return res.status(404).json({
+          success: false,
+          message: `Equipment not found: ${item.equipmentId}`
+        });
+      }
+
+      if (item.quantity > equipment.actualAvailableQuantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient quantity for ${equipment.name}. Available: ${equipment.actualAvailableQuantity}, Requested: ${item.quantity}`
+        });
+      }
+    }
+
+    // Create checkout record
+    const checkoutData = {
+      eventName,
+      eventType,
+      responsiblePerson,
+      contactNumber,
+      eventDate: new Date(eventDate),
+      eventLocation,
+      expectedReturnDate: new Date(expectedReturnDate),
+      items: items.map(item => ({
+        equipment: item.equipmentId,
+        quantity: parseInt(item.quantity),
+        notes: item.notes
+      })),
+      notes,
+      checkedOutBy: req.user._id,
+      status: 'checked_out'
+    };
+
+    // Create the checkout (assuming we have an EventCheckout model)
+    const EventCheckout = require('../models/EventCheckout');
+    const checkout = await EventCheckout.create(checkoutData);
+
+    // Update equipment quantities
+    for (const item of items) {
+      const equipment = await Equipment.findById(item.equipmentId);
+      equipment.currentQuantityOut = (equipment.currentQuantityOut || 0) + parseInt(item.quantity);
+      equipment.actualAvailableQuantity = equipment.availableQuantity - equipment.currentQuantityOut;
+      
+      // Update checkout status
+      if (equipment.actualAvailableQuantity === 0) {
+        equipment.checkoutStatus = 'fully_checked_out';
+      } else if (equipment.currentQuantityOut > 0) {
+        equipment.checkoutStatus = 'partially_checked_out';
+      }
+      
+      await equipment.save();
+    }
+
+    // Populate the checkout with equipment details
+    await checkout.populate('items.equipment', 'name code category');
+    await checkout.populate('checkedOutBy', 'name email');
+
+    res.status(201).json({
+      success: true,
+      data: checkout,
+      message: 'Event checkout created successfully'
+    });
+
+  } catch (error) {
+    console.error('Error creating event checkout:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create event checkout',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Get all event checkouts
+ * @route   GET /api/v1/equipment/event-checkout
+ * @access  Private
+ */
+exports.getEventCheckouts = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 50,
+      status,
+      eventType,
+      search,
+      startDate,
+      endDate
+    } = req.query;
+
+    // Build query
+    const query = {};
+    if (status) query.status = status;
+    if (eventType) query.eventType = eventType;
+    
+    if (search) {
+      query.$or = [
+        { eventName: { $regex: search, $options: 'i' } },
+        { responsiblePerson: { $regex: search, $options: 'i' } },
+        { eventLocation: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (startDate || endDate) {
+      query.eventDate = {};
+      if (startDate) query.eventDate.$gte = new Date(startDate);
+      if (endDate) query.eventDate.$lte = new Date(endDate);
+    }
+
+    // Pagination
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const EventCheckout = require('../models/EventCheckout');
+    const [checkouts, total] = await Promise.all([
+      EventCheckout.find(query)
+        .populate('items.equipment', 'name code category')
+        .populate('checkedOutBy', 'name email')
+        .populate('returnedBy', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum),
+      EventCheckout.countDocuments(query)
+    ]);
+
+    // Add overdue status
+    const checkoutsWithStatus = checkouts.map(checkout => {
+      const checkoutObj = checkout.toObject();
+      if (checkoutObj.status === 'checked_out' && new Date(checkoutObj.expectedReturnDate) < new Date()) {
+        checkoutObj.status = 'overdue';
+      }
+      return checkoutObj;
+    });
+
+    res.json({
+      success: true,
+      data: checkoutsWithStatus,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching event checkouts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch event checkouts',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Get single event checkout
+ * @route   GET /api/v1/equipment/event-checkout/:id
+ * @access  Private
+ */
+exports.getEventCheckout = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const EventCheckout = require('../models/EventCheckout');
+    const checkout = await EventCheckout.findById(id)
+      .populate('items.equipment', 'name code category')
+      .populate('checkedOutBy', 'name email')
+      .populate('returnedBy', 'name email');
+
+    if (!checkout) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event checkout not found'
+      });
+    }
+
+    // Add overdue status
+    const checkoutObj = checkout.toObject();
+    if (checkoutObj.status === 'checked_out' && new Date(checkoutObj.expectedReturnDate) < new Date()) {
+      checkoutObj.status = 'overdue';
+    }
+
+    res.json({
+      success: true,
+      data: checkoutObj
+    });
+
+  } catch (error) {
+    console.error('Error fetching event checkout:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch event checkout',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Return event checkout
+ * @route   PUT /api/v1/equipment/event-checkout/:id/return
+ * @access  Private (Reception/Admin only)
+ */
+exports.returnEventCheckout = async (req, res) => {
+  try {
+    // Check permissions
+    if (!['super_admin', 'department_admin', 'reception'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied - Reception or Admin only'
+      });
+    }
+
+    const { id } = req.params;
+    const { returnDate, condition, notes } = req.body;
+
+    const EventCheckout = require('../models/EventCheckout');
+    const checkout = await EventCheckout.findById(id)
+      .populate('items.equipment');
+
+    if (!checkout) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event checkout not found'
+      });
+    }
+
+    if (checkout.status === 'returned') {
+      return res.status(400).json({
+        success: false,
+        message: 'Equipment already returned'
+      });
+    }
+
+    // Update checkout record
+    checkout.status = 'returned';
+    checkout.returnDate = returnDate ? new Date(returnDate) : new Date();
+    checkout.returnCondition = condition || 'good';
+    checkout.returnNotes = notes;
+    checkout.returnedBy = req.user._id;
+
+    await checkout.save();
+
+    // Update equipment quantities
+    for (const item of checkout.items) {
+      const equipment = await Equipment.findById(item.equipment._id);
+      equipment.currentQuantityOut = Math.max(0, (equipment.currentQuantityOut || 0) - item.quantity);
+      equipment.actualAvailableQuantity = equipment.availableQuantity - equipment.currentQuantityOut;
+      
+      // Update checkout status
+      if (equipment.currentQuantityOut === 0) {
+        equipment.checkoutStatus = 'available';
+      } else if (equipment.currentQuantityOut < equipment.availableQuantity) {
+        equipment.checkoutStatus = 'partially_checked_out';
+      }
+      
+      await equipment.save();
+    }
+
+    // Populate the updated checkout
+    await checkout.populate('items.equipment', 'name code category');
+    await checkout.populate('checkedOutBy', 'name email');
+    await checkout.populate('returnedBy', 'name email');
+
+    res.json({
+      success: true,
+      data: checkout,
+      message: 'Equipment returned successfully'
+    });
+
+  } catch (error) {
+    console.error('Error returning event checkout:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to return equipment',
       error: error.message
     });
   }

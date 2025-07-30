@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { 
   LayoutDashboard, 
@@ -15,12 +15,32 @@ import {
   FileText,
   FileCheck,
   Clock,
-  Shield
+  Shield,
+  ChevronDown,
+  ChevronRight,
+  List,
+  ArrowLeftRight,
+  ClipboardList
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const Sidebar = ({ onClose }) => {
   const { user } = useAuth()
+  const [expandedMenus, setExpandedMenus] = useState({})
+  
+  // Auto-expand equipment menu if on equipment pages
+  React.useEffect(() => {
+    if (window.location.pathname.startsWith('/equipment')) {
+      setExpandedMenus(prev => ({ ...prev, 'Equipment Management': true }))
+    }
+  }, [])
+
+  const toggleMenu = (menuName) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [menuName]: !prev[menuName]
+    }))
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -28,7 +48,16 @@ const Sidebar = ({ onClose }) => {
     { name: 'Studio Booking', href: '/studio', icon: Calendar },
     { name: 'External Events', href: '/events', icon: PartyPopper },
     { name: 'Rental Management', href: '/rentals', icon: Package },
-    { name: 'Equipment Management', href: '/equipment', icon: Wrench },
+    { 
+      name: 'Equipment Management', 
+      icon: Wrench,
+      isExpandable: true,
+      subItems: [
+        { name: 'Equipment List', href: '/equipment/list', icon: List },
+        { name: 'In/Out Tracker', href: '/equipment/tracker', icon: ArrowLeftRight },
+        { name: 'Maintenance Report', href: '/equipment/maintenance', icon: ClipboardList }
+      ]
+    },
     { name: 'Invoices', href: '/invoices', icon: FileText },
     { name: 'Quotations', href: '/quotations', icon: FileCheck },
     { name: 'Activity History', href: '/activities', icon: Clock },
@@ -67,6 +96,56 @@ const Sidebar = ({ onClose }) => {
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navigation.map((item) => {
           const Icon = item.icon
+          
+          // Handle expandable menu items
+          if (item.isExpandable) {
+            const isExpanded = expandedMenus[item.name]
+            return (
+              <div key={item.name}>
+                <button
+                  onClick={() => toggleMenu(item.name)}
+                  className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  <div className="flex items-center">
+                    <Icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                    <span className="truncate">{item.name}</span>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+                
+                {isExpanded && (
+                  <div className="ml-6 mt-2 space-y-1">
+                    {item.subItems.map((subItem) => {
+                      const SubIcon = subItem.icon
+                      return (
+                        <NavLink
+                          key={subItem.name}
+                          to={subItem.href}
+                          className={({ isActive }) =>
+                            `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[36px] ${
+                              isActive
+                                ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-500'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`
+                          }
+                          onClick={onClose}
+                        >
+                          <SubIcon className="h-4 w-4 mr-3 flex-shrink-0" />
+                          <span className="truncate">{subItem.name}</span>
+                        </NavLink>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          }
+          
+          // Handle regular menu items
           return (
             <NavLink
               key={item.name}
@@ -86,6 +165,7 @@ const Sidebar = ({ onClose }) => {
           )
         })}
       </nav>
+       
 
       {/* User info */}
       <div className="p-4 border-t border-gray-200">
