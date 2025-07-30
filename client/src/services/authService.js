@@ -7,7 +7,14 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true
+})
+
+// Log API configuration
+console.log('API Configuration:', {
+  baseURL: API_URL,
+  environment: import.meta.env.MODE
 })
 
 // Add token to requests
@@ -65,6 +72,10 @@ export const authService = {
       // Handle different types of errors
       if (error.code === 'NETWORK_ERROR' || error.code === 'ERR_NETWORK') {
         throw new Error('Network error. Please check your internet connection.')
+      }
+      
+      if (error.message && error.message.includes('CORS')) {
+        throw new Error('CORS error. The server may not be configured to accept requests from this domain.')
       }
       
       if (error.response?.status === 401) {
