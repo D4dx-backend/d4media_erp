@@ -283,12 +283,15 @@ if (isMaster) {
     // Graceful shutdown
     const gracefulShutdown = () => {
       appLogger.info("Received shutdown signal, closing server...");
-      server.close(() => {
+      server.close(async () => {
         appLogger.info("Server closed");
-        mongoose.connection.close(false, () => {
+        try {
+          await mongoose.connection.close();
           appLogger.info("Database connection closed");
-          process.exit(0);
-        });
+        } catch (error) {
+          appLogger.error("Error closing database connection:", error);
+        }
+        process.exit(0);
       });
 
       // Force close if graceful shutdown fails

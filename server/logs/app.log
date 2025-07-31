@@ -3165,3 +3165,27 @@
 2025-07-30T12:28:37.905Z [info]: Scheduler service started successfully {"service":"d4-media-app"}
 2025-07-30T12:28:37.905Z [info]: Scheduler service started {"service":"d4-media-app"}
 2025-07-30T12:28:53.493Z [info]: Received shutdown signal, closing server... {"service":"d4-media-app"}
+2025-07-31T00:44:55.208Z [info]: Server running on port 5001 {"service":"d4-media-app"}
+2025-07-31T00:44:55.210Z [info]: Environment: development {"service":"d4-media-app"}
+2025-07-31T00:44:55.211Z [info]: Worker process 55851 started {"service":"d4-media-app"}
+2025-07-31T00:44:55.211Z [info]: Starting scheduler service... {"service":"d4-media-app"}
+2025-07-31T00:44:55.213Z [info]: Scheduler service started successfully {"service":"d4-media-app"}
+2025-07-31T00:44:55.213Z [info]: Scheduler service started {"service":"d4-media-app"}
+2025-07-31T00:46:10.526Z [info]: Received shutdown signal, closing server... {"service":"d4-media-app"}
+2025-07-31T00:46:17.454Z [info]: Server running on port 5001 {"service":"d4-media-app"}
+2025-07-31T00:46:17.455Z [info]: Environment: development {"service":"d4-media-app"}
+2025-07-31T00:46:17.455Z [info]: Worker process 56115 started {"service":"d4-media-app"}
+2025-07-31T00:46:17.455Z [info]: Starting scheduler service... {"service":"d4-media-app"}
+2025-07-31T00:46:17.456Z [info]: Scheduler service started successfully {"service":"d4-media-app"}
+2025-07-31T00:46:17.457Z [info]: Scheduler service started {"service":"d4-media-app"}
+2025-07-31T00:47:15.917Z [info]: Server running on port 5001 {"service":"d4-media-app"}
+2025-07-31T00:47:15.918Z [info]: Environment: development {"service":"d4-media-app"}
+2025-07-31T00:47:15.918Z [info]: Worker process 56466 started {"service":"d4-media-app"}
+2025-07-31T00:47:15.918Z [info]: Starting scheduler service... {"service":"d4-media-app"}
+2025-07-31T00:47:15.920Z [info]: Scheduler service started successfully {"service":"d4-media-app"}
+2025-07-31T00:47:15.920Z [info]: Scheduler service started {"service":"d4-media-app"}
+2025-07-31T00:47:17.409Z [info]: Creating database indexes for performance optimization... {"service":"d4-media-app"}
+2025-07-31T00:47:19.048Z [info]: User indexes created {"service":"d4-media-app"}
+2025-07-31T00:47:19.764Z [error]: Error creating database indexes: Index already exists with a different name: dueDate_ttl_index {"service":"d4-media-app","ok":0,"code":85,"codeName":"IndexOptionsConflict","$clusterTime":{"clusterTime":{"$timestamp":"7533041233212473345"},"signature":{"hash":"n7R5WkqmSIvCRZFXgfiMJ7yoJvA=","keyId":{"low":3,"high":1744139103,"unsigned":false}}},"operationTime":{"$timestamp":"7533041233212473345"},"stack":"MongoServerError: Index already exists with a different name: dueDate_ttl_index\n    at Connection.onMessage (/Users/d4-ceo/Desktop/D4media ERP/d4media_erp/server/node_modules/mongodb/lib/cmap/connection.js:202:26)\n    at MessageStream.<anonymous> (/Users/d4-ceo/Desktop/D4media ERP/d4media_erp/server/node_modules/mongodb/lib/cmap/connection.js:61:60)\n    at MessageStream.emit (node:events:507:28)\n    at processIncomingData (/Users/d4-ceo/Desktop/D4media ERP/d4media_erp/server/node_modules/mongodb/lib/cmap/message_stream.js:124:16)\n    at MessageStream._write (/Users/d4-ceo/Desktop/D4media ERP/d4media_erp/server/node_modules/mongodb/lib/cmap/message_stream.js:33:9)\n    at writeOrBuffer (node:internal/streams/writable:570:12)\n    at _write (node:internal/streams/writable:499:10)\n    at Writable.write (node:internal/streams/writable:508:10)\n    at TLSSocket.ondata (node:internal/streams/readable:1008:24)\n    at TLSSocket.emit (node:events:507:28)"}
+2025-07-31T00:47:19.764Z [info]: Database indexes created successfully {"service":"d4-media-app"}
+2025-07-31T01:00:00.802Z [info]: Running deadline reminder check... {"service":"d4-media-app"}
