@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import './styles/index.css'
+import './utils/envDebug.js' // Load environment debugging
 
 // Create a client
 const queryClient = new QueryClient({

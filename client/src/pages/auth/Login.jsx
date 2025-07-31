@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { toast } from 'react-hot-toast'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import ApiDebug from '../../components/debug/ApiDebug'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -28,14 +29,36 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      await login(formData)
+      const response = await login(formData)
       toast.success('Login successful!')
-      navigate('/dashboard')
+      
+      // Navigate based on user role
+      const userRole = response?.user?.role
+      if (userRole === 'super_admin') {
+        navigate('/dashboard')
+      } else if (userRole === 'department_admin') {
+        navigate('/dashboard')
+      } else if (userRole === 'reception') {
+        navigate('/dashboard')
+      } else if (userRole === 'client') {
+        navigate('/client-portal')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (error) {
-      toast.error(error.message || 'Login failed')
+      console.error('Login error:', error)
+      const errorMessage = error.message || 'Login failed. Please check your credentials.'
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleTestLogin = () => {
+    setFormData({
+      email: 'admin@d4media.com',
+      password: 'admin123'
+    })
   }
 
   return (
@@ -43,6 +66,11 @@ const Login = () => {
       <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
         Sign in to your account
       </h2>
+      
+      {/* Debug component - remove in production */}
+      <div className="mb-6">
+        <ApiDebug />
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -90,7 +118,12 @@ const Login = () => {
         >
           {isLoading ? <LoadingSpinner size="small" /> : 'Sign in'}
         </button>
+
+   
       </form>
+
+      {/* Test Credentials Info */}
+      
 
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
