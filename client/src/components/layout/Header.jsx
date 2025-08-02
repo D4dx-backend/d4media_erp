@@ -165,7 +165,7 @@ const Header = ({ onMenuClick }) => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 aria-label="User menu"
               >
-                <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-d4blue-500 rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <div className="hidden sm:block text-left">

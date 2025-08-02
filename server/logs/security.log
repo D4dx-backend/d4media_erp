@@ -462,3 +462,12 @@ Sat Jul 19 2025 15:59:54 GMT+0530 (India Standard Time) [info]: PASSWORD_RESET {
 2025-07-31T00:46:57.360Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
 2025-07-31T00:47:07.364Z [error]: SERVER_ERROR {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","statusCode":500}
 2025-07-31T00:47:26.228Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
+2025-07-31T01:41:44.836Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
+2025-07-31T01:42:09.150Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/logout","body":{}}
+2025-07-31T01:45:34.422Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
+2025-07-31T01:46:11.469Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
+2025-07-31T01:46:17.083Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
+2025-07-31T01:46:48.351Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/logout","body":{}}
+2025-07-31T01:47:40.667Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}
+2025-07-31T01:48:00.332Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/logout","body":{}}
+2025-08-02T09:07:10.235Z [info]: ADMIN_ACTION {"service":"d4-media-security","userId":"unauthenticated","ip":"::1","method":"POST","path":"/api/v1/auth/login","body":{}}

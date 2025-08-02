@@ -23,6 +23,7 @@ import {
   ClipboardList
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import D4MediaLogo from '../common/D4MediaLogo'
 
 const Sidebar = ({ onClose }) => {
   const { user } = useAuth()
@@ -80,7 +81,7 @@ const Sidebar = ({ onClose }) => {
     <div className="flex flex-col h-full bg-white border-r border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">D4 Media</h1>
+        <D4MediaLogo size="md" showText={true} />
         {onClose && (
           <button
             onClick={onClose}
@@ -128,7 +129,7 @@ const Sidebar = ({ onClose }) => {
                           className={({ isActive }) =>
                             `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[36px] ${
                               isActive
-                                ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-500'
+                                ? 'bg-d4blue-50 text-d4blue-700 border-r-2 border-d4blue-500'
                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                             }`
                           }
@@ -153,7 +154,7 @@ const Sidebar = ({ onClose }) => {
               className={({ isActive }) =>
                 `flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
                   isActive
-                    ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-500'
+                    ? 'bg-d4blue-50 text-d4blue-700 border-r-2 border-d4blue-500'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`
               }
@@ -170,7 +171,7 @@ const Sidebar = ({ onClose }) => {
       {/* User info */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-d4blue-500 rounded-full flex items-center justify-center">
             <span className="text-white text-sm font-medium">
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </span>
